@@ -1,0 +1,47 @@
+# Node.js dependencies
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn.lock  # If you use Yarn instead of npm
+package-lock.json  # Optional: Keep if you want lockfile in repo
+
+# TypeScript build output
+dist/
+build/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.development
+.env.production
+.env.*
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# OS-specific files
+.DS_Store  # macOS
+Thumbs.db  # Windows
+
+# Editor-specific files
+.vscode/  # VS Code settings (optional: keep if sharing config)
+.idea/    # JetBrains IDEs
+*.sublime-project
+*.sublime-workspace
+
+# Test coverage
+coverage/
+
+# Production-only files (if applicable)
+*.pid
+*.seed
+*.pid.lock
+
+# Local development artifacts
+*.local

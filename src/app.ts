@@ -1,6 +1,7 @@
 import express, { Application } from 'express';
 import cookieParser from 'cookie-parser';
-import  routerConfigs from './routes/routeConfig';
+import routerConfigs from './routes/routeConfig';
+import sequelize  from './config/databases';
 
 /**
  * The Server
@@ -17,8 +18,9 @@ class Server {
      */
     constructor(){
         this.app =  express();
-        this.setupRoutes();
+        this.databaseInit();
         this.initializeMiddleware();
+        this.setupRoutes();
     }
 
     /**
@@ -30,11 +32,21 @@ class Server {
         return new Server();
     }
 
-    public initializeMiddleware(){
+    private async databaseInit(){
+        try{
+            await sequelize.authenticate();
+            console.log('Connection has been established successfully.');
+            await sequelize.sync({ alter: false });
+            console.log('All models were synchronized successfully.');
+        } catch(error){
+            console.error(`Unable to connect to database :: Error - ${error}`);
+        }
+    }
+    private initializeMiddleware(){
         //Built-in Express middleware for JSON and URL-encoded bodies
-        this.app.use(express.json());
-        this.app.use(express.urlencoded({ extended: true }));
-        this.app.use(express.raw());
+        this.app.use(express.json( { limit: '50mb'}));
+        this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+        this.app.use(express.raw({ type: 'text/html'}));
         this.app.use(cookieParser());
     }
 
@@ -43,6 +55,9 @@ class Server {
             this.app.use(path, router);
         });
     }
+
+    
+
 }
 
 const server  = Server.bootstrap();

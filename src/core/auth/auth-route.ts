@@ -3,7 +3,8 @@ import dotenv from 'dotenv';
 import { AuthController } from './auth-controller';
 import { 
     SIGNUP_VALIDATORS,
-    LOGIN_VALIDATORS
+    LOGIN_VALIDATORS,
+    LOGOUT_VALIDATORS
 } from './validation/AuthValidation';
 
 dotenv.config();
@@ -18,6 +19,11 @@ router.post('/signup',
 router.post('/login',
     LOGIN_VALIDATORS,
     AuthController.login
+);
+
+router.post('/logout',
+    LOGOUT_VALIDATORS,
+    AuthController.logout
 )
 
 export default router;

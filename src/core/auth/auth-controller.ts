@@ -60,7 +60,7 @@ export class AuthController {
                     });
                 }
 
-                const token = jwt.sign({ id: user.id }, config.jwt_SECRET, { expiresIn: '1h' });
+                const token = jwt.sign({ id: user.id }, config.JWT_SECRET, { expiresIn: '1h' });
 
                 await UserSessions.create({ user_id: user.id, token});
 
@@ -79,5 +79,31 @@ export class AuthController {
                 res.status(500).json({ message: 'Internal server error' });
             }
         }
+
+    }
+
+    public static async logout(req: Request, res: Response, next: NextFunction){
+        try{
+            const { token } = req.body;
+            const existingUserSessions = await UserSessions.findOne({ where: { token }});
+            if(existingUserSessions){
+                await UserSessions.destroy({ where: { token } });
+                res.status(200).json({ 
+                    message: 'Logged out successfully...'
+                });
+            } else {
+                res.status(401).json({ 
+                    message: 'Invalid token...'
+                });
+            }
+        } catch(error){
+            console.error(error);
+
+            // Ensure this only runs if no response was already sent
+            if (!res.headersSent) {
+                res.status(500).json({ message: 'Internal server error' });
+            }
+        }
+
     }
 }

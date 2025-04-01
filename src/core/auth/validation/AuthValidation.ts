@@ -15,3 +15,8 @@ export const LOGIN_VALIDATORS: ValidationChain[] = [
     body('password', 'It should not be empty and should be an valid string')
         .isString().isLength({ min: 1})
 ];
+
+export const LOGOUT_VALIDATORS: ValidationChain[] = [
+    body('token', 'It should be an valid token')
+        .isString().trim()
+]

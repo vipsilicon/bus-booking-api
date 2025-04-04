@@ -2,6 +2,8 @@ import express, { Application } from 'express';
 import cookieParser from 'cookie-parser';
 import routerConfigs from './routes/routeConfig';
 import sequelize  from './config/databases';
+import cors from 'cors';
+import { config } from './config/config';
 
 /**
  * The Server
@@ -43,6 +45,11 @@ class Server {
         }
     }
     private initializeMiddleware(){
+        this.app.use(cors({
+            origin: config.origin, // Allow frontend URL
+            methods: config.methods,
+            allowedHeaders: config.allowedHeaders
+        }));
         //Built-in Express middleware for JSON and URL-encoded bodies
         this.app.use(express.json( { limit: '50mb'}));
         this.app.use(express.urlencoded({ extended: true, limit: '50mb' }));

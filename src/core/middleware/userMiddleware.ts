@@ -5,7 +5,7 @@ import UserSessions from '../../models/UserSession';
 
 export const userMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const token = req.headers.authorization?.split(' ')[1];
+        const token = req.headers['authorization']?.toString().split(' ')[1];
 
         if(!token){
             res.status(401).json({

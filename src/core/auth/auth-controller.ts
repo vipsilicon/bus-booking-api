@@ -9,8 +9,6 @@ import { config } from '../../config/config';
 export class AuthController {
 
     public static async signUp(req: Request, res: Response, next: NextFunction){
-        // console.log(req.body);
-        // res.status(200).json(req.body);
         try{
             const { email, password, name } = req.body;
             const errors = validationResult(req);
@@ -84,18 +82,25 @@ export class AuthController {
 
     public static async logout(req: Request, res: Response, next: NextFunction){
         try{
-            const { token } = req.body;
-            const existingUserSessions = await UserSessions.findOne({ where: { token }});
-            if(existingUserSessions){
-                await UserSessions.destroy({ where: { token } });
-                res.status(200).json({ 
-                    message: 'Logged out successfully...'
-                });
+            const token = req.headers['authorization']?.toString()?.split(' ')[1];
+            if(token){
+                const existingUserSessions = await UserSessions.findOne({ where: { token }});
+                if(existingUserSessions){
+                    await UserSessions.destroy({ where: { token } });
+                    res.status(200).json({ 
+                        message: 'Logged out successfully...'
+                    });
+                } else {
+                    res.status(401).json({ 
+                        message: 'Invalid token...'
+                    });
+                }
             } else {
                 res.status(401).json({ 
-                    message: 'Invalid token...'
-                });
+                        message: 'No token provided...'
+                    });
             }
+
         } catch(error){
             console.error(error);
 

@@ -6,6 +6,7 @@ import {
     LOGIN_VALIDATORS,
     LOGOUT_VALIDATORS
 } from './validation/AuthValidation';
+import { userMiddleware } from '../middleware/userMiddleware';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ router.post('/login',
 
 router.post('/logout',
     LOGOUT_VALIDATORS,
+    userMiddleware,
     AuthController.logout
 )
 

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import Users from '../../models/Users';
-import UserSessions from '../../models/UserSession';
+import UserSessions, { UserSessionStatus } from '../../models/UserSession';
 import { validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config/config';
@@ -58,12 +58,23 @@ export class AuthController {
                     });
                 }
 
-                const token = jwt.sign({ id: user.id }, config.JWT_SECRET, { expiresIn: '1h' });
-
-                await UserSessions.create({ user_id: user.id, token});
+                const accessToken = jwt.sign({ 
+                    id: user.id,
+                    name: user.name,
+                    email: user.email 
+                }, config.JWT_SECRET, { expiresIn: '1h' });
+                
+                const refreshToken = jwt.sign({ 
+                    id: user.id,
+                    name: user.name,
+                    email: user.email
+                }, config.JWT_SECRET, { expiresIn: '2h'})
+                
+                await UserSessions.create({ user_id: user.id, accessToken, refreshToken, status: UserSessionStatus.LOGIN});
 
                 res.status(200).json({
-                    token: token,
+                    accessToken,
+                    refreshToken,
                     name: user.name,
                     email: user.email
                 })
@@ -82,11 +93,14 @@ export class AuthController {
 
     public static async logout(req: Request, res: Response, next: NextFunction){
         try{
-            const token = req.headers['authorization']?.toString()?.split(' ')[1];
-            if(token){
-                const existingUserSessions = await UserSessions.findOne({ where: { token }});
+            const accessToken = req.headers['authorization']?.toString()?.split(' ')[1];
+            if(accessToken){
+                const existingUserSessions = await UserSessions.findOne({ where: { accessToken }});
                 if(existingUserSessions){
-                    await UserSessions.destroy({ where: { token } });
+                    await UserSessions.update(
+                        { status: UserSessionStatus.LOGOUT},
+                        { where: { accessToken }}
+                    )
                     res.status(200).json({ 
                         message: 'Logged out successfully...'
                     });
@@ -110,5 +124,88 @@ export class AuthController {
             }
         }
 
+    }
+
+    public static async refreshToken(req: Request, res: Response, next: NextFunction){
+        try{
+            const _refreshToken = req.headers['authorization']?.toString()?.split(" ")[1];
+
+            if(!_refreshToken){
+                res.status(401).json({
+                    message: 'Unauthorized : No refresh Token provided'
+                });
+            } else {
+
+                const existRefreshToken = await UserSessions.findOne({ 
+                    where: {refreshToken: _refreshToken}}
+                );
+
+                if(!existRefreshToken){
+                    res.status(401).json({
+                        message: 'Unauthorized: Refresh Token not exist'
+                    });
+                } else {
+                    if(existRefreshToken.status == UserSessionStatus.LOGOUT){
+                        res.status(401).json({
+                            message: 'Unauthorized: user already logout'
+                        });
+                    } else {
+                        jwt.verify(_refreshToken, config.JWT_SECRET, async (error:any, decode:any) => {
+                            if(error){
+                                if(error.name === 'TokenExpiredError'){
+                                    res.status(401).json({
+                                        message: 'Unauthorized: refreshToken expired.'
+                                    });
+                                } else {
+                                    res.status(401).json({
+                                        message: 'Unauthorized: refreshToken invalid.'
+                                    });
+                                }
+                            } else {
+    
+                                const accessToken = jwt.sign({
+                                    id: decode.id,
+                                    name: decode.name,
+                                    email: decode.email
+                                }, config.JWT_SECRET, { expiresIn: '1h'});
+    
+                                const refreshToken = jwt.sign({
+                                    id: decode.id,
+                                    name: decode.name,
+                                    email: decode.email
+                                }, config.JWT_SECRET, { expiresIn: '1h'});
+    
+                                await UserSessions.create({ 
+                                    user_id: decode.id, 
+                                    accessToken, 
+                                    refreshToken,
+                                    status: UserSessionStatus.REFRESH_TOKEN
+                                });
+    
+                                await UserSessions.update(
+                                    { status: UserSessionStatus.TOKEN_EXPIRED },
+                                    { where: { refreshToken: _refreshToken }}
+                                )
+                                
+                                res.status(200).json({ 
+                                    accessToken,
+                                    refreshToken,
+                                    name: decode.name,
+                                    email: decode.email
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+
+        } catch(error){
+            console.error(error);
+
+            // Ensure this only runs if no response was already sent
+            if (!res.headersSent) {
+                res.status(500).json({ message: 'Internal server error' });
+            }
+        }
     }
 }

@@ -2,10 +2,21 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../config/databases';
 import Users from './Users';
 
+
+export enum UserSessionStatus {
+    LOGIN = 'LOGIN',
+    LOGOUT = 'LOGOUT',
+    REFRESH_TOKEN = 'REFRESH TOKEN',
+    TOKEN_EXPIRED = 'TOKEN EXPIRED',
+    ACTIVE = 'ACTIVE'
+}
+
 class UserSessions extends Model {
     public id!: number;
     public user_id!: number;
     public token!: string;
+    // await UserSessions.destroy({ where: { accessToken } });
+    public status!: UserSessionStatus
 }
 
 UserSessions.init(
@@ -24,10 +35,20 @@ UserSessions.init(
             },
             onDelete: 'CASCADE'
         },
-        token: {
+        accessToken: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true
+        },
+        refreshToken: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true
+        },
+        status: {
+            type: DataTypes.ENUM(...Object.values(UserSessionStatus)),
+            allowNull: false,
+            defaultValue: UserSessionStatus.LOGIN
         }
     },
     {

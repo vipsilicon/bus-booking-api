@@ -24,4 +24,14 @@ export const LOGOUT_VALIDATORS: ValidationChain[] = [
     .withMessage('Authorization must be a valid string')
     .matches(/^Bearer\s[\w-]*\.[\w-]*\.[\w-]*$/)
     .withMessage('Authorization must be a valid Bearer token')
+];
+
+export const REFRESH_TOKEN_VALIDATORS: ValidationChain[] = [
+    header('authorization', 'Authorization header is required')
+    .isString()
+    .trim()
+    .notEmpty()
+    .withMessage('Authorization must be a valid string')
+    .matches(/^Bearer\s[\w-]*\.[\w-]*\.[\w-]*$/)
+    .withMessage('Authorization must be a valid Bearer token')
 ]

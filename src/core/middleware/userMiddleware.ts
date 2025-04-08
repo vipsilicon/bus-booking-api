@@ -1,38 +1,52 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config/config';
-import UserSessions from '../../models/UserSession';
+import UserSessions, { UserSessionStatus } from '../../models/UserSession';
 
 export const userMiddleware = async (req: Request, res: Response, next: NextFunction) => {
     try{
-        const token = req.headers['authorization']?.toString().split(' ')[1];
+        const accessToken = req.headers['authorization']?.toString().split(' ')[1];
 
-        if(!token){
+        if(!accessToken){
             res.status(401).json({
-                message: 'Unauthorized: No token provided.'
+                message: 'Unauthorized: No accessToken provided.'
             });
         } else {
 
-            const userSession = await UserSessions.findOne({ where: { token }});
+            const userSession = await UserSessions.findOne({ where: { accessToken }});
             if(!userSession){
                 res.status(401).json({
                     message: 'Unauthorized : User session expired or invalid.'
                 });
             } else {
-                jwt.verify(token, config.JWT_SECRET, (error:any, decoded:any) => {
+                jwt.verify(accessToken, config.JWT_SECRET, async (error:any, decoded:any) => {
                     if(error){
                         if(error.name === 'TokenExpiredError'){
                             res.status(401).json({
-                                message: 'Unauthorized: Token expired.'
+                                message: 'Unauthorized: accessToken expired.'
                             });
                         } else {
                             res.status(401).json({
-                                message: 'Unauthorized: Token invalid.'
+                                message: 'Unauthorized: accessToken invalid.'
                             });
                         }
                     } else {
-                        req.body.user = decoded
-                        next();
+                        if(userSession.status == UserSessionStatus.LOGOUT){
+                            res.status(401).json({
+                                message: 'Unauthorized: user already logout.'
+                            });
+                        } else if(userSession.status == UserSessionStatus.TOKEN_EXPIRED){
+                            res.status(401).json({
+                                message: 'Unauthorized: accessToken expired.'
+                            });
+                        } else {
+                            await UserSessions.update(
+                                { status: UserSessionStatus.ACTIVE },
+                                { where : { accessToken }}
+                            );
+                            req.body.user = decoded
+                            next();
+                        }
                     }
                     
                 });

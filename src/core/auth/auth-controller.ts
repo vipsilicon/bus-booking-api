@@ -6,6 +6,11 @@ import { validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { config } from '../../config/config';
 
+enum ExpiredIn {
+    accessToken = '1h',
+    refreshToken = '2h'
+}
+
 export class AuthController {
 
     public static async signUp(req: Request, res: Response, next: NextFunction){
@@ -62,13 +67,13 @@ export class AuthController {
                     id: user.id,
                     name: user.name,
                     email: user.email 
-                }, config.JWT_SECRET, { expiresIn: '1h' });
+                }, config.JWT_SECRET, { expiresIn: ExpiredIn.accessToken });
                 
                 const refreshToken = jwt.sign({ 
                     id: user.id,
                     name: user.name,
                     email: user.email
-                }, config.JWT_SECRET, { expiresIn: '2h'})
+                }, config.JWT_SECRET, { expiresIn: ExpiredIn.refreshToken})
                 
                 await UserSessions.create({ user_id: user.id, accessToken, refreshToken, status: UserSessionStatus.LOGIN});
 
@@ -167,31 +172,31 @@ export class AuthController {
                                     id: decode.id,
                                     name: decode.name,
                                     email: decode.email
-                                }, config.JWT_SECRET, { expiresIn: '1h'});
+                                }, config.JWT_SECRET, { expiresIn: ExpiredIn.accessToken});
     
                                 const refreshToken = jwt.sign({
                                     id: decode.id,
                                     name: decode.name,
                                     email: decode.email
-                                }, config.JWT_SECRET, { expiresIn: '1h'});
+                                }, config.JWT_SECRET, { expiresIn: ExpiredIn.refreshToken});
     
+                                await UserSessions.update(
+                                    { status: UserSessionStatus.TOKEN_EXPIRED },
+                                    { where: { refreshToken: _refreshToken }}
+                                )
+
                                 await UserSessions.create({ 
                                     user_id: decode.id, 
                                     accessToken, 
                                     refreshToken,
                                     status: UserSessionStatus.REFRESH_TOKEN
                                 });
-    
-                                await UserSessions.update(
-                                    { status: UserSessionStatus.TOKEN_EXPIRED },
-                                    { where: { refreshToken: _refreshToken }}
-                                )
-                                
+        
                                 res.status(200).json({ 
                                     accessToken,
                                     refreshToken,
-                                    name: decode.name,
-                                    email: decode.email
+                                    name: decode.name?.toString(),
+                                    email: decode.email?.toString()
                                 });
                             }
                         });

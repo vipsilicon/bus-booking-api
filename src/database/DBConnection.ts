@@ -16,10 +16,12 @@ export const sequelize = new Sequelize(
 export const connectDB = async () => {
 	try {
 		await sequelize.authenticate();
-		await sequelize.sync({ alter: true });
+		if (process.env.NODE_ENV !== 'production') {
+			await sequelize.sync();
+		}
 		console.log('Database connected');
 	} catch (error) {
-		console.log('Database Not Coneected');
-		console.log(error.message);
+		console.error('Database connection failed:', error instanceof Error ? error.message : error);
+		throw error;
 	}
 };

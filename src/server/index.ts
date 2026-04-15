@@ -1,25 +1,21 @@
+import cors from 'cors';
 import express from 'express';
-// import cors from 'cors';
 
-import Router from '@/routes/index';
-// import * as Constants from '@constants/index';
+import Router from '@routes/index';
+import errorHandler from '@middleware/error.middleware';
 
 const app: express.Express = express();
 
-// if (process.env.NODE_ENV === Constants.NODE_ENVIRONMENT.DEVELOPMENT) {
-// 	const allowOrigins = ['http://localhost:3000'];
+app.use(express.json());
 
-// 	app.options('*', cors());
-// 	const corsOption: cors.CorsOptions = {
-// 		origin: allowOrigins
-// 	};
-// 	app.use(cors(corsOption));
-// } else if (process.env.NODE_ENV === Constants.NODE_ENVIRONMENT.PRODUCTION) {
-// 	app.use(cors());
-// }
+const allowOrigins = ['http://localhost:3000'];
+const corsOptions = {
+	origin: process.env.NODE_ENV === 'production' ? true : allowOrigins
+};
 
+app.use(cors(corsOptions));
 app.use(Router);
-
 app.use(express.static('public'));
+app.use(errorHandler);
 
 export default app;

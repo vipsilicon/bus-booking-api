@@ -8,19 +8,19 @@ const test = async (request: Request, response: Response) => {
 
 	try {
 		const query = request.query;
-		console.log(JSON.stringify(query));
+		console.log('Public test query:', JSON.stringify(query));
 
-		const user = await Services.getUsers();
+		const users = await Services.getUsers();
 
-		appResponse.status = 200;
-		appResponse.message = 'test message';
-
-		if (user) {
-			appResponse.body = user;
-		}
+		appResponse.status = Constants.HTTP.SUCCESS.code;
+		appResponse.message = 'Users retrieved successfully';
+		appResponse.body = users;
 	} catch (error) {
-		appResponse.status = 400;
-		appResponse.message = error.message;
+		appResponse.status = Constants.HTTP.INTERNAL_SERVER_ERROR.code;
+		appResponse.message =
+			error instanceof Error
+				? error.message
+				: Constants.HTTP.INTERNAL_SERVER_ERROR.message;
 	}
 
 	response.status(appResponse.status).json(appResponse);

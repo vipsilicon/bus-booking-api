@@ -2,12 +2,18 @@ import '@common/env';
 import Server from '@server/index';
 import { connectDB } from '@database/DBConnection';
 
-(async () => {
-	await connectDB();
-})();
+const PORT = Number(process.env.PORT ?? 3000);
 
-const PORT: number = parseInt(process.env.PORT as string, 10);
+const startServer = async () => {
+	try {
+		await connectDB();
+		Server.listen(PORT, () => {
+			console.log(`Server running on ${PORT}`);
+		});
+	} catch (error) {
+		console.error('Server startup failed:', error instanceof Error ? error.message : error);
+		process.exit(1);
+	}
+};
 
-Server.listen(PORT, async () => {
-	console.log(`Server running on ${PORT}`);
-});
+startServer();

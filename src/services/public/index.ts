@@ -1,12 +1,5 @@
-import Users from '@/models/Users';
+import Users from '@models/Users';
 
-const getUsers = async () => {
-	try {
-		const users = await Users.findOne();
-		return users;
-	} catch (error) {
-		throw error;
-	}
-};
+const getUsers = async () => Users.findAll();
 
 export { getUsers };

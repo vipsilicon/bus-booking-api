@@ -59,7 +59,8 @@
 			"@coreutils/*": ["./src/core/utils/*"],
 			"@core/*": ["./src/core/portfolio/*"],
 			"@coretests/*": ["./src/core/portfolio/tests/*"],
-			"@config/*": ["./src/config/*"]
+			"@config/*": ["./src/config/*"],
+			"@models/*": ["./src/models/*"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.json", ".env", "src/typings/**/*.d.ts"],

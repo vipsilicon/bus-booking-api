@@ -1,15 +1,13 @@
-import * as HTTP from 'http';
-import server  from './app';
-import { config } from './config/config';
+import '@common/env';
+import Server from '@server/index';
+import { connectDB } from '@database/DBConnection';
 
-async function start(){
+(async () => {
+	await connectDB();
+})();
 
-    server.app.set('port', config.port);
+const PORT: number = parseInt(process.env.PORT as string, 10);
 
-    let httpServer = HTTP.createServer(server.app);
-    httpServer.listen(config.port, () => {
-        console.log(`Server running on port ${config.port} in ${config.NODE_ENV} mode`);
-    });
-}
-
-start();
+Server.listen(PORT, async () => {
+	console.log(`Server running on ${PORT}`);
+});

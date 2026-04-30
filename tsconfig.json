@@ -60,7 +60,8 @@
 			"@core/*": ["./src/core/portfolio/*"],
 			"@coretests/*": ["./src/core/portfolio/tests/*"],
 			"@config/*": ["./src/config/*"],
-			"@models/*": ["./src/models/*"]
+			"@models/*": ["./src/models/*"],
+			"@interfaces/*": ["./src/interfaces/*"]
 		}
 	},
 	"include": ["src/**/*.ts", "src/**/*.json", ".env", "src/typings/**/*.d.ts"],

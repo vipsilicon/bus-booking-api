@@ -1,7 +1,7 @@
+import { Request, Response } from 'express';
+
 import * as Constants from '@constants/index';
 import * as Services from '@services/public/index';
-
-import { Request, Response } from 'express';
 
 const test = async (request: Request, response: Response) => {
 	const appResponse = { ...Constants.defaultServerResponse };

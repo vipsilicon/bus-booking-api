@@ -24,14 +24,8 @@ class InputValidator {
 		(schema: Joi.Schema, convert = false) =>
 		(req: Request, res: Response, next: NextFunction) => {
 			const response = { ...Constants.defaultServerResponse };
-			// console.log( " Request + body ", req.body)
 			const error = this.validateObjectSchema(req.body, schema, convert);
 			if (error) {
-				// Logger.error(
-				// 	`file: @middleware/input.validator, func:validateBody(), message: ${JSON.stringify(
-				// 		error
-				// 	)}`
-				// );
 				response.body = error;
 				response.message = Constants.requestValidationMessage.BAD_REQUEST;
 				return res.status(response.status).send(response);
@@ -43,15 +37,9 @@ class InputValidator {
 		(schema: Joi.Schema, convert = false) =>
 		(req: Request, res: Response, next: NextFunction) => {
 			const response = { ...Constants.defaultServerResponse };
-			// console.log( " Request + body ", req.body)
 			const jsonBody = JSON.parse(req.body.toString('utf8'));
 			const error = this.validateObjectSchema(jsonBody, schema, convert);
 			if (error) {
-				// Logger.error(
-				// 	`file: @middleware/input.validator, func:validateRawBody(), message: ${JSON.stringify(
-				// 		error
-				// 	)}`
-				// );
 				response.body = error;
 				response.message = Constants.requestValidationMessage.BAD_REQUEST;
 				return res.status(response.status).send(response);
@@ -66,11 +54,6 @@ class InputValidator {
 			const response = { ...Constants.defaultServerResponse };
 			const error = this.validateObjectSchema(req.query, schema, convert);
 			if (error) {
-				// Logger.error(
-				// 	`file: @middleware/input.validator, func:validateQueryParams(), message: ${JSON.stringify(
-				// 		error
-				// 	)}`
-				// );
 				response.body = error;
 				response.message = Constants.requestValidationMessage.BAD_REQUEST;
 				return res.status(response.status).send(response);
@@ -84,11 +67,6 @@ class InputValidator {
 			const response = { ...Constants.defaultServerResponse };
 			const error = this.validateObjectSchema(req.params, schema, convert);
 			if (error) {
-				// Logger.error(
-				// 	`file: @middleware/input.validator, func:validateParams(), message: ${JSON.stringify(
-				// 		error
-				// 	)}`
-				// );
 				response.body = error;
 				response.message = Constants.requestValidationMessage.BAD_REQUEST;
 				return res.status(response.status).send(response);

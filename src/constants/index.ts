@@ -75,10 +75,53 @@ const HTTP = {
 	}
 };
 
+const ROLES = {
+	USER: 'user',
+	ADMIN: 'admin',
+	BUS_OWNER: 'bus_owner'
+};
+
+type ROLES_TYPE = (typeof ROLES)[keyof typeof ROLES];
+
+const USERS = {
+	message: {
+		USER_CREATED: 'User created successfully',
+		USER_CREATION_FAILED: 'Failed to create user',
+		USER_NOT_FOUND: 'User not found',
+		USER_RETRIEVED: 'User retrieved successfully',
+		USER_UPDATE_SUCCESS: 'User updated successfully',
+		USER_UPDATE_FAILED: 'Failed to update user',
+		USER_DELETED: 'User deleted successfully',
+		USER_DELETION_FAILED: 'Failed to delete user',
+		LOGIN_SUCCESS: 'Login successful',
+		LOGIN_FAILED: 'Login failed',
+		INVALID_CREDENTIALS: 'Invalid email or password'
+	}
+};
+
+const EXPIRES_IN = {
+	USER: '1h',
+	ADMIN: '2h',
+	BUS_OWNER: '1h'
+};
+
+const ERROR_HANDLING = {
+	message: {
+		AUTH_TOKEN_MISSING:
+			'Authentication token is missing from the request header',
+		INVALID_TOKEN: 'The provided authentication token is invalid'
+	}
+};
+
 export {
 	NODE_ENVIRONMENT,
 	defaultServerResponse,
 	PRISMAQUERY_CONFIG,
 	requestValidationMessage,
-	HTTP
+	HTTP,
+	ROLES,
+	ROLES_TYPE,
+	USERS,
+	EXPIRES_IN,
+	ERROR_HANDLING
 };
